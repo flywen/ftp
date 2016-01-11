@@ -4,6 +4,8 @@
 from ftplib import FTP
 import os,sys,string,datetime,time
 import socket
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 class CYFTP:
 
@@ -74,7 +76,8 @@ class CYFTP:
         remotenames = self.file_list
         for item in remotenames:
             filetype = item[0]
-            filename = item[1]
+            filename = item[1].decode('utf-8')
+            #filename = item[1].decode('GBK')
             local = os.path.join(localdir, filename)
             if filetype == 'd':
                 self.start_down(local, filename)
@@ -83,9 +86,9 @@ class CYFTP:
         self.ftp.cwd('..')
 
 if __name__=='__main__':
-    host = '192.168.1.156'
-    user = 'uftp'
-    passwd = '111111'
+    host = '192.168.1.204'
+    user = 'administrator'
+    passwd = 'Server2014'
 
     nowtime = time.strftime('%Y-%m-%d %H:%M:%S')
     log = open('log.txt', 'a')
