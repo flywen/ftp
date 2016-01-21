@@ -6,11 +6,12 @@ import ConfigParser
 import os,sys,string,datetime,time
 import socket
 import chardet
+import logging
+import logging.config
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
 class CYFTP:
-
     def __init__(self, host, user, passwd):
         self.host = host
         self.user = user
@@ -24,11 +25,14 @@ class CYFTP:
     def login(self):
         ftp = self.ftp
         ftp.set_pasv(True)
-        print ('开始连接到 %s' %(self.host)).decode('utf-8').encode('gbk')
+        #print ('开始连接到 %s' %(self.host)).decode('utf-8').encode('gbk')
+        logger.debug(('开始连接到 %s' %(self.host)).decode('utf-8').encode('gbk'))
         ftp.connect(self.host, 21)
         ftp.login(self.user, self.passwd)
-        print ('成功连接到服务器').decode('utf-8').encode('gbk')
-        log.write(('%s 开始更新\n' %nowtime).decode('utf-8').encode('gbk'))
+        #print ('成功连接到服务器').decode('utf-8').encode('gbk')
+        logger.debug(('成功连接到服务器').decode('utf-8').encode('gbk'))
+        #log.write(('%s 开始更新\n' %nowtime).decode('utf-8').encode('gbk'))
+        logger.info(('开始更新\n').decode('utf-8').encode('gbk'))
         ftp.cwd('./')
 
     def get_file_list(self, line):
@@ -78,21 +82,25 @@ class CYFTP:
         if self.is_same(localfile, remotefile):
             return
         else:
-            print ('开始下载文件 %s' %localfile).decode('utf-8').encode('gbk')
-            log.write(('文件 %s 下载成功\n' %localfile).decode('utf-8').encode('gbk'))
+            logger.debug(('开始下载文件 %s' %localfile).decode('utf-8').encode('gbk'))
+            #print ('开始下载文件 %s' %localfile).decode('utf-8').encode('gbk')
+            #log.write(('文件 %s 下载成功\n' %localfile).decode('utf-8').encode('gbk'))
             file_handler = open(localfile, 'wb')
             bufsize = 1024
             try:
                 self.ftp.retrbinary('RETR %s'%(remotefile), file_handler.write, bufsize)
             except Exception as error:
-                print(error)
+                #print(error)
+                logger.warning(error)
+            logger.info(('文件 %s 下载成功' %localfile).decode('utf-8').encode('gbk'))
             file_handler.close()
 
     def start_down(self, localdir, remotedir):
         try:
             self.ftp.cwd(remotedir)
         except Exception, e:
-            print e
+            #print e
+            logger.warning(e)
             return
 
         if not os.path.isdir(localdir):
@@ -101,7 +109,8 @@ class CYFTP:
         
         self.list_nlst = self.ftp.nlst()
         for i in self.list_nlst:
-            print ('本目录文件列表: %s' %i).decode('utf-8').encode('gbk')
+            #print ('本目录文件列表: %s' %i).decode('utf-8').encode('gbk')
+            logger.debug(('本目录文件列表: %s' %i).decode('utf-8').encode('gbk'))
 
         try:
             self.ftp.dir(self.get_file_list)
@@ -130,6 +139,11 @@ if __name__=='__main__':
     #sleep_time = 10
     #time.sleep(sleep_time)
 
+    #通过logging.config模块配置日志
+    logging.config.fileConfig('loggers.conf')
+    logger = logging.getLogger('cyftp')
+
+    #从配置文件获取参数
     cp = ConfigParser.ConfigParser()
     cp.read('cyftp.conf')
     host = cp.get('host', 'host')
@@ -140,7 +154,7 @@ if __name__=='__main__':
     shift = cp.getint('path', 'shift')
 
     nowtime = time.strftime('%Y-%m-%d %H:%M:%S')
-    log = open('log.txt', 'a')
+    #log = open('log.txt', 'a')
 
     go = CYFTP(host, user, passwd)
     go.login()
@@ -157,5 +171,6 @@ if __name__=='__main__':
             remotepath_full = remotepath+month_day
             go.start_down(localpath_full, remotepath_full)
 
-    log.write(('%s 更新成功\n\n' %nowtime).decode('utf-8').encode('gbk'))
-    log.close()
+    logger.info(('更新成功\n\n').decode('utf-8').encode('gbk'))
+    #log.write(('%s 更新成功\n\n' %nowtime).decode('utf-8').encode('gbk'))
+    #log.close()
