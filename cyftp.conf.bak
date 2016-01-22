@@ -1,9 +1,0 @@
-[host]
-host = 183.129.164.6
-user = starcorpublishftp
-passwd = cycms2014
-
-[path]
-localpath = ../2016/
-remotepath = ./[ 岳阳、宣化 ]媒资下载/2016年1月/
-shift = 2
