@@ -8,6 +8,7 @@ import socket
 import chardet
 import logging
 import logging.config
+import pdb
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -100,7 +101,7 @@ class CYFTP:
             self.ftp.cwd(remotedir)
         except Exception, e:
             #print e
-            logger.warning(e)
+            logger.warning(str(e).decode('utf-8').encode('gbk'))
             return
 
         if not os.path.isdir(localdir):
@@ -165,6 +166,7 @@ if __name__=='__main__':
     end_day = day+1
     for i in range(start_day, end_day):
         if i > 0:
+            #pdb.set_trace()
             month_day = (str(month)+'月'+str(i)+'日/').decode('utf-8').encode('gbk')
             month_day1 = time.strftime('%m-')+str(i)
             localpath_full = localpath+month_day1
