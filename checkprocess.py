@@ -14,4 +14,5 @@ if __name__ == '__main__':
     while 1 == 1:
         sleep_time = 30
         time.sleep(sleep_time)
-        check_exsit('cyftp.exe')
+        #check_exsit('cyftp.exe')
+        check_exsit('cyftp_dy.exe')
