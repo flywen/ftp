@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # coding=utf-8
 
 from ftplib import FTP
@@ -51,7 +51,8 @@ class CYFTP:
         #    pos += 1
 
         for i in self.list_nlst:
-            if i in line:
+        #20160527 解决不下载小海报的问题
+            if (i in line) and ('s_'+i not in line):
                 pp = i
         #36:39是月，40:42是日
         file_arr = [line[0], line[36:39], line[40:42], pp]
