@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # coding=utf-8
 
 from ftplib import FTP
@@ -55,7 +55,7 @@ class CYFTP:
             if (i in line) and ('s_'+i not in line):
                 pp = i
         #36:39是月，40:42是日
-        file_arr = [line[0], line[36:39], line[40:42], pp]
+        file_arr = [line[0], line[36:39], line[40:42], line[44:48], pp]
         return file_arr
 
     def is_same(self, localfile, remotefile):
@@ -108,13 +108,20 @@ class CYFTP:
 
         remotenames = self.file_list
         for item in remotenames:
-            if nowmonth != item[1]:
-                continue
-            if int(item[2]) < shiftday:
+            #如果是item[3]是"7:28"这样的就是本年度的文件(夹)
+            if ':' in item[3]:
+                year = time.strftime('%Y')
+            else:
+                year = item[3]
+            file_time = item[2]+' '+item[1]+' '+year
+            #计算文件(夹)时间与当前时间相差的天数来判断是否下载
+            shiftday = datetime.datetime.now()-datetime.datetime.strptime(file_time,'%d %b %Y')
+            if shiftday.days > shift:
                 continue
             filetype = item[0]
-            filename = item[3].decode('utf-8').encode('gbk')
+            filename = item[4].decode('utf-8').encode('gbk')
             local = os.path.join(localdir, filename)
+            #如果是文件夹就递归，是文件就下载
             if filetype == 'd':
                 self.start_down(local, filename)
             elif filetype == '-':
@@ -139,10 +146,6 @@ if __name__=='__main__':
     localpath = cp.get('path', 'localpath')
     remotepath = cp.get('path', 'remotepath')
     shift = cp.getint('path', 'shift')
-
-    nowmonth = time.strftime('%b')
-    nowday = time.strftime('%d')
-    shiftday = int(nowday) - shift
 
     go = CYFTP(host, user, passwd)
     go.login()
