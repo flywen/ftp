@@ -13,8 +13,9 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 class CYFTP:
-    def __init__(self, host, user, passwd):
+    def __init__(self, host, port, user, passwd):
         self.host = host
+        self.port = int(port)
         self.user = user
         self.passwd = passwd
         self.ftp = FTP()
@@ -27,7 +28,7 @@ class CYFTP:
         ftp = self.ftp
         ftp.set_pasv(True)
         logger.debug(('开始连接到 %s' %(self.host)).decode('utf-8').encode('gbk'))
-        ftp.connect(self.host, 21)
+        ftp.connect(self.host, self.port)
         ftp.login(self.user, self.passwd)
         logger.debug(('成功连接到服务器').decode('utf-8').encode('gbk'))
         logger.info(('开始更新\n').decode('utf-8').encode('gbk'))
@@ -141,13 +142,14 @@ if __name__=='__main__':
     cp = ConfigParser.ConfigParser()
     cp.read('cyftp.conf')
     host = cp.get('host', 'host')
+    port = cp.get('host', 'port')
     user = cp.get('host', 'user')
     passwd = cp.get('host', 'passwd')
     localpath = cp.get('path', 'localpath')
     remotepath = cp.get('path', 'remotepath')
     shift = cp.getint('path', 'shift')
 
-    go = CYFTP(host, user, passwd)
+    go = CYFTP(host, port, user, passwd)
     go.login()
     go.start_down(localpath, remotepath)
 
